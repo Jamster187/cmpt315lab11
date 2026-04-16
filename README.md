@@ -1,50 +1,56 @@
-# MERN Deployment Teaching Starter
+# CMPT 315 - Lab 11
 
-This project is a teaching starter for:
-- React (Vite frontend)
-- Express backend
-- MongoDB Atlas
-- Session-based authentication
-- Basic HTTP caching examples
-- Deployment to Render as **one web service**
+## How to Run
 
-## Goal
-You receive most of the code already written.
-Complete a few focused TODOs around and focus on deployment:
-1. Session setup
-2. Login / logout
-3. Cache headers
-4. Protected route behavior
-
-## Project structure
-- `client/` - React frontend
-- `server/` - Express + Mongoose backend
-- `instructor-only/` - solution notes and deployment checklist
-
-## Local setup
-### 1) Install root dev dependency
+### 1. Install dependencies
+From project root:
 ```bash
 npm install
+cd server && npm install
+cd ../client && npm install
 ```
 
-### 2) Create environment file
-Create `server/.env` from `server/.env.example`
+### 2. Set environment variables
+Create `server/.env` with:
+```
+MONGODB_URI=your_mongodb_uri
+SESSION_SECRET=your_secret
+PORT=5001
+NODE_ENV=development
+```
 
-### 3) Start both frontend and backend
+### 3. Run in development
+Backend:
 ```bash
+cd server
+node server.js
+```
+
+Frontend (new terminal):
+```bash
+cd client
 npm run dev
 ```
 
-- React client: `http://localhost:5173`
-- Express server: `http://localhost:5001`
+Open:
+```
+http://localhost:5173
+```
 
-## Build for production
+### 4. Run production build
+From root:
 ```bash
 npm run build
 npm start
 ```
 
-The Express server will serve the built React app from `client/dist`.
+Open:
+```
+http://localhost:5001
+```
 
-## Suggested TODOs
-Search the backend for `TODO:`.
+### 5. Test login
+```
+username: student
+password: password123
+```
