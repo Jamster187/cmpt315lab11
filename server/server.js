@@ -83,9 +83,15 @@ app.post('/api/auth/login', (req, res) => {
     role: user.role
   }
 
-  res.json({
-    message: 'Login successful.',
-    user: req.session.user
+  req.session.save((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Login failed.' })
+    }
+
+    res.json({
+      message: 'Login successful.',
+      user: req.session.user
+    })
   })
 })
 
@@ -113,6 +119,7 @@ app.get('/api/todos', requireLogin, async (req, res) => {
     const todos = await Todo.find({ owner: req.session.user.username }).sort({ createdAt: -1 })
     res.json(todos)
   } catch (err) {
+    console.error('GET TODOS ERROR:', err)
     res.status(500).json({ error: 'Could not load todos.' })
   }
 })
