@@ -54,3 +54,6 @@ http://localhost:5001
 username: student
 password: password123
 ```
+
+MongoDB Atlas connection could not be finalized due to account access issues. 
+All backend routes, session handling, and deployment were tested locally and function correctly.
