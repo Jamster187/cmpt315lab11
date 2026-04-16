@@ -31,6 +31,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 2,
       httpOnly: true,
@@ -94,6 +95,7 @@ app.post('/api/auth/logout', (req, res) => {
       return res.status(500).json({ error: 'Logout failed.' })
     }
 
+    res.clearCookie('connect.sid')
     res.json({ message: 'Logged out.' })
   })
 })
@@ -107,35 +109,52 @@ app.get('/api/session/me', requireLogin, (req, res) => {
 })
 
 app.get('/api/todos', requireLogin, async (req, res) => {
-  const todos = await Todo.find({ owner: req.session.user.username }).sort({ createdAt: -1 })
-  res.json(todos)
+  try {
+    const todos = await Todo.find({ owner: req.session.user.username }).sort({ createdAt: -1 })
+    res.json(todos)
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load todos.' })
+  }
 })
 
 app.post('/api/todos', requireLogin, async (req, res) => {
-  const title = (req.body.title || '').trim()
-  if (!title) return res.status(400).json({ error: 'Title is required.' })
+  try {
+    const title = (req.body.title || '').trim()
 
-  const created = await Todo.create({
-    title,
-    owner: req.session.user.username
-  })
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required.' })
+    }
 
-  res.status(201).json(created)
+    const created = await Todo.create({
+      title,
+      owner: req.session.user.username
+    })
+
+    res.status(201).json(created)
+  } catch (err) {
+    console.error('CREATE TODO ERROR:', err)
+    res.status(500).json({ error: 'Could not create todo.' })
+  }
 })
 
 app.patch('/api/todos/:id/toggle', requireLogin, async (req, res) => {
-  const todo = await Todo.findOne({
-    _id: req.params.id,
-    owner: req.session.user.username
-  })
+  try {
+    const todo = await Todo.findOne({
+      _id: req.params.id,
+      owner: req.session.user.username
+    })
 
-  if (!todo) {
-    return res.status(404).json({ error: 'Todo not found.' })
+    if (!todo) {
+      return res.status(404).json({ error: 'Todo not found.' })
+    }
+
+    todo.completed = !todo.completed
+    await todo.save()
+    res.json(todo)
+  } catch (err) {
+    console.error('TOGGLE TODO ERROR:', err)
+    res.status(500).json({ error: 'Could not update todo.' })
   }
-
-  todo.completed = !todo.completed
-  await todo.save()
-  res.json(todo)
 })
 
 const clientDistPath = path.join(__dirname, '..', 'client', 'dist')
